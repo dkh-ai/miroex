@@ -3,3 +3,17 @@ dist/
 .env
 .DS_Store
 output/
+
+# Render output
+board-*.html
+board-*.svg
+
+# Backups
+*.backup.*
+
+# IDE
+.vscode/
+.idea/
+
+# TypeScript
+*.tsbuildinfo
