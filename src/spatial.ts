@@ -19,8 +19,10 @@ export function getItemDiagonal(item: MiroItem): number {
   if (!item.geometry) {
     return 100;
   }
-  const { width, height } = item.geometry;
-  return Math.sqrt(width * width + height * height);
+  const width = item.geometry.width ?? 0;
+  const height = item.geometry.height ?? 0;
+  const diag = Math.sqrt(width * width + height * height);
+  return diag > 0 ? diag : 100;
 }
 
 /**

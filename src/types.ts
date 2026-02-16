@@ -29,6 +29,8 @@ export interface MiroItem {
   position?: {
     x: number;
     y: number;
+    origin?: string;
+    relativeTo?: string;
   };
   geometry?: {
     width: number;

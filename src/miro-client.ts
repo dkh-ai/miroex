@@ -9,6 +9,71 @@ import type {
 const BASE_URL = "https://api.miro.com";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+/**
+ * Convert all parent-relative positions to absolute (canvas) coordinates.
+ *
+ * Miro API returns two coordinate systems:
+ *   - relativeTo: "canvas_center"    → absolute (frames, free items)
+ *   - relativeTo: "parent_top_left"  → relative to parent frame
+ *
+ * For parent_top_left items:
+ *   absolute = parent_center - parent_size/2 + child_position
+ *
+ * Handles nested parents recursively.
+ * Mutates items in place.
+ */
+function normalizePositions(items: MiroItem[]): void {
+  const itemMap = new Map<string, MiroItem>();
+  for (const item of items) {
+    itemMap.set(item.id, item);
+  }
+
+  // Cache resolved absolute positions to avoid recomputation
+  const resolved = new Set<string>();
+
+  function resolveItem(item: MiroItem): void {
+    if (resolved.has(item.id)) return;
+    if (!item.position) {
+      resolved.add(item.id);
+      return;
+    }
+
+    if (item.position.relativeTo !== "parent_top_left" || !item.parent?.id) {
+      // Already absolute (canvas_center) or no parent
+      resolved.add(item.id);
+      return;
+    }
+
+    const parent = itemMap.get(item.parent.id);
+    if (!parent || !parent.position) {
+      resolved.add(item.id);
+      return;
+    }
+
+    // Ensure parent is resolved first
+    resolveItem(parent);
+
+    const parentCenterX = parent.position.x;
+    const parentCenterY = parent.position.y;
+    const parentHalfW = (parent.geometry?.width ?? 0) / 2;
+    const parentHalfH = (parent.geometry?.height ?? 0) / 2;
+
+    // parent top-left in absolute coordinates
+    const parentTopLeftX = parentCenterX - parentHalfW;
+    const parentTopLeftY = parentCenterY - parentHalfH;
+
+    item.position.x = parentTopLeftX + item.position.x;
+    item.position.y = parentTopLeftY + item.position.y;
+    item.position.relativeTo = "canvas_center";
+
+    resolved.add(item.id);
+  }
+
+  for (const item of items) {
+    resolveItem(item);
+  }
+}
+
 export class MiroClient {
   private token: string;
   private cache: Map<string, BoardCache> = new Map();
@@ -90,6 +155,8 @@ export class MiroClient {
         `${BASE_URL}/v2/boards/${boardId}/connectors?limit=50`
       ),
     ]);
+
+    normalizePositions(items);
 
     const boardCache: BoardCache = {
       board,

@@ -150,24 +150,70 @@ server.tool(
   },
   async ({ board_id, cluster_radius }) => {
     const cache = await miro.getBoardData(board_id);
-    const nonFrameItems = cache.items.filter((i) => i.type !== "frame");
-    const clusters = clusterItems(nonFrameItems, cluster_radius);
+    const frameIds = new Set(cache.items.filter((i) => i.type === "frame").map((i) => i.id));
+
+    // Separate framed items (grouped by parent) from free items (clustered spatially)
+    const framedGroups = new Map<string, typeof cache.items>();
+    const freeItems: typeof cache.items = [];
+
+    for (const item of cache.items) {
+      if (item.type === "frame") continue;
+      if (item.parent?.id && frameIds.has(item.parent.id)) {
+        const group = framedGroups.get(item.parent.id);
+        if (group) group.push(item);
+        else framedGroups.set(item.parent.id, [item]);
+      } else {
+        freeItems.push(item);
+      }
+    }
+
+    // Cluster free items spatially
+    const freeClusters = clusterItems(freeItems, cluster_radius);
     const boardBounds = getBoardBounds(cache.items);
 
-    const result = {
-      clusters: clusters.map((cl) => ({
-        id: cl.id,
-        centroid: cl.centroid,
-        position: describePosition(cl.centroid.x, cl.centroid.y, boardBounds),
-        bounding_box: cl.bounds,
-        item_count: cl.items.length,
-        items: cl.items.map((i) => ({
+    // Build result: frame groups + free clusters
+    const frameClusterList = [...framedGroups.entries()].map(([frameId, items], idx) => {
+      const frame = cache.items.find((i) => i.id === frameId);
+      return {
+        id: `frame-${idx}`,
+        type: "frame" as const,
+        frame_title: frame?.data?.title ?? frameId,
+        position: frame?.position
+          ? describePosition(frame.position.x, frame.position.y, boardBounds)
+          : "unknown",
+        item_count: items.length,
+        items: items.map((i) => ({
           type: i.type,
           content: itemContent(i),
           color: i.style?.fillColor,
           label: itemLabel(i),
         })),
+      };
+    });
+
+    const freeClusterList = freeClusters.map((cl) => ({
+      id: `cluster-${cl.id}`,
+      type: "spatial" as const,
+      position: describePosition(cl.centroid.x, cl.centroid.y, boardBounds),
+      bounding_box: cl.bounds,
+      item_count: cl.items.length,
+      items: cl.items.map((i) => ({
+        type: i.type,
+        content: itemContent(i),
+        color: i.style?.fillColor,
+        label: itemLabel(i),
       })),
+    }));
+
+    const result = {
+      frame_groups: frameClusterList,
+      free_clusters: freeClusterList,
+      stats: {
+        framed_items: cache.items.filter((i) => i.parent?.id && frameIds.has(i.parent.id)).length,
+        free_items: freeItems.length,
+        frame_groups: frameClusterList.length,
+        free_clusters: freeClusterList.length,
+      },
     };
 
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
