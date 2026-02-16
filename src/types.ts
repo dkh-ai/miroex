@@ -11,7 +11,7 @@ export interface MiroBoard {
 export interface MiroItem {
   id: string;
   type: string; // "sticky_note", "shape", "text", "image", "frame", "card", etc.
-  data: {
+  data?: {
     content?: string; // HTML content
     shape?: string; // for shapes
     title?: string; // for frames

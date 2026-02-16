@@ -81,6 +81,8 @@ export function itemLabel(item: MiroItem): string {
 export function itemContent(item: MiroItem): string {
   let raw = "";
 
+  if (!item.data) return "";
+
   switch (item.type) {
     case "sticky_note":
     case "shape":
@@ -318,11 +320,13 @@ export function serializeBoard(cache: BoardCache, maxTokens?: number): string {
       const fromFrame = getItemFrame(conn.from, frameIds);
       const toFrame = getItemFrame(conn.to, frameIds);
 
+      const fromFrameItem = fromFrame ? itemMap.get(fromFrame) : undefined;
       const fromPrefix = fromFrame
-        ? `${itemContent(itemMap.get(fromFrame)!) || fromFrame}/`
+        ? `${(fromFrameItem ? itemContent(fromFrameItem) : "") || fromFrame}/`
         : "";
+      const toFrameItem = toFrame ? itemMap.get(toFrame) : undefined;
       const toPrefix = toFrame
-        ? `${itemContent(itemMap.get(toFrame)!) || toFrame}/`
+        ? `${(toFrameItem ? itemContent(toFrameItem) : "") || toFrame}/`
         : "";
 
       const fromText = truncate(

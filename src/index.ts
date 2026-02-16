@@ -42,7 +42,7 @@ server.tool(
 
     const frameList = frames.map((f) => ({
       id: f.id,
-      title: f.data.title ?? f.id,
+      title: f.data?.title ?? f.id,
       item_count: items.filter((i) => i.parent?.id === f.id).length,
       position: f.position
         ? describePosition(f.position.x, f.position.y, boardBounds)
@@ -109,7 +109,7 @@ server.tool(
 
     const result = {
       frame: {
-        title: frame.data.title ?? frame.id,
+        title: frame.data?.title ?? frame.id,
         position: frame.position
           ? describePosition(frame.position.x, frame.position.y, boardBounds)
           : "unknown",
@@ -260,7 +260,7 @@ server.tool(
             label: itemLabel(item),
           },
           context: {
-            frame: frame ? { id: frame.id, title: frame.data.title ?? frame.id } : undefined,
+            frame: frame ? { id: frame.id, title: frame.data?.title ?? frame.id } : undefined,
             connected_items: connectedItems,
           },
         };
