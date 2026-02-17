@@ -161,7 +161,11 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Only run main() when executed directly (not when imported)
+const isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/.*\//, ""));
+if (isMain) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
