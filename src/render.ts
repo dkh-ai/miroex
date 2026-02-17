@@ -28,7 +28,7 @@ function parseArgs(argv: string[]) {
   return { boardId, output, svgOnly };
 }
 
-function wrapHtml(svgContent: string, boardName: string): string {
+export function wrapHtml(svgContent: string, boardName: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

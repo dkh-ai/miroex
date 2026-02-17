@@ -132,6 +132,12 @@ export class MiroClient {
     );
   }
 
+  async listBoards(): Promise<MiroBoard[]> {
+    return this.fetchAllPages<MiroBoard>(
+      `${BASE_URL}/v2/boards?sort=last_modified&limit=50`
+    );
+  }
+
   async getBoardData(
     boardId: string,
     forceRefresh = false
