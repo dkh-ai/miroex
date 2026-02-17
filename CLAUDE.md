@@ -126,6 +126,7 @@ npm run dev    # Dev mode (tsx, auto-reload)
 npm run build  # Compile to dist/
 npm start      # Run compiled
 npm run render # Visual board rendering (CLI)
+npm run cli    # Interactive CLI (board selection, render, export, info)
 ```
 
 ## Registration
