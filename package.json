@@ -2,7 +2,21 @@
   "name": "miroex",
   "version": "1.0.0",
   "type": "module",
-  "description": "MCP server that converts Miro boards into machine-readable format",
+  "description": "MCP server that converts Miro boards into structured, machine-readable text for LLMs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dkh-ai/miroex.git"
+  },
+  "keywords": [
+    "miro",
+    "mcp",
+    "claude",
+    "llm",
+    "model-context-protocol",
+    "board-reader",
+    "spatial-clustering"
+  ],
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -15,6 +29,7 @@
     "@inquirer/prompts": "^8.2.1",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "dotenv": "^17.3.1",
+    "openai": "^6.22.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {

@@ -12,8 +12,9 @@ src/miro-client.ts  — Miro REST API v2 client (pagination, caching, coordinate
 src/spatial.ts      — DBSCAN clustering, bounding box, position serialization
 src/serializer.ts   — Board → structured text for LLM (stripHtml, itemContent, serializeBoard)
 src/svg-renderer.ts — Board → SVG string (visual rendering of all item types + connectors)
+src/analyzer.ts     — OpenAI-based board analysis (analyzeBoard, chatAboutBoard)
 src/render.ts       — CLI: render board to interactive HTML or bare SVG
-src/_export.ts      — CLI: export raw JSON + serialized text to output/
+src/_export.ts      — CLI: export raw JSON + serialized text + optional LLM analysis to output/
 src/cli.ts          — CLI: interactive menu (board selection, actions, loop)
 src/types.ts        — TypeScript interfaces (MiroItem, MiroConnector, BoardCache, BoundingBox, Cluster)
 ```
@@ -30,13 +31,17 @@ graph LR
     D --> G[MCP Tools]
     E --> G
     E --> H[CLI / Export]
+    E --> J[Analyzer]
+    J --> K[OpenAI API]
     F --> I[HTML Viewer]
     F --> H
 ```
 
 **MCP Flow:** Tool call → MiroClient (cached) → Spatial Engine → Serializer → Text response
 
-**CLI Flow:** Interactive menu → MiroClient → Action (render/export/info) → Output
+**CLI Flow:** Interactive menu → MiroClient → Action (render/export/analyze/info) → Output
+
+**Analyze Flow:** Serializer → text → OpenAI (analysis + insights) → markdown files → interactive chat
 
 **Render Flow:** CLI args → MiroClient → `renderBoardToSvg()` → HTML wrapper (pan/zoom JS) → file + `open`
 
@@ -119,11 +124,22 @@ class MiroClient {
 - Named colors (yellow, green и т.д.) → hex mapping
 - Adaptive font size: `sqrt(area / charCount)`
 
+### Analyzer (`src/analyzer.ts`)
+
+```typescript
+analyzeBoard(serializedText, boardName, boardId, stats): Promise<{analysis, insights}>
+chatAboutBoard(serializedText, analysis, insights): Promise<void>
+```
+
+- `analyzeBoard()` — два последовательных вызова OpenAI (gpt-4o): analysis, затем insights (insights получает analysis как контекст)
+- `chatAboutBoard()` — интерактивный чат с streaming, system message содержит доску + analysis + insights
+- Промпты на русском, формат из примеров в `output/онтология/` и `output/Штуковина/`
+
 ### Interactive CLI (`src/cli.ts`)
 
 - `parseBoardId(raw)` — извлекает ID из Miro URL или возвращает как есть
 - `selectBoard(miro)` — список досок из API + ручной ввод (fallback)
-- `selectAction()` — render HTML/SVG, export, info
+- `selectAction()` — render HTML/SVG, export, analyze, info
 - `runAction(action, cache)` — выполняет действие
 - Main loop: board → action → next (same/other/exit)
 - Поддерживает `argv[2]` для прямого указания board ID
@@ -144,7 +160,7 @@ npx tsx src/render.ts <board_id> [-o path] [--svg-only]
 npx tsx src/_export.ts <board_id>
 ```
 
-Сохраняет в `output/<board_name>/`: `01-raw-data.json`, `02-serialized.txt`
+Сохраняет в `output/<board_name>/`: `01-raw-data.json`, `02-serialized.txt`, опционально `03-analysis.md` и `04-insights.md` (при наличии `OPENAI_API_KEY`)
 
 ## MCP Tools (6 штук)
 
@@ -166,6 +182,7 @@ graph TD
     sp[spatial.ts]
     sr[serializer.ts]
     svg[svg-renderer.ts]
+    az[analyzer.ts]
     idx[index.ts]
     rnd[render.ts]
     exp[_export.ts]
@@ -185,10 +202,12 @@ graph TD
     svg --> rnd
     mc --> exp
     sr --> exp
+    az --> exp
     mc --> cli
     svg --> cli
     rnd --> cli
     sr --> cli
+    az --> cli
 ```
 
 Циклических зависимостей нет.
@@ -198,6 +217,7 @@ graph TD
 | Параметр | Источник | Описание | По умолчанию |
 |----------|----------|----------|--------------|
 | `MIRO_API_TOKEN` | `.env` / env | Bearer token для Miro API | обязателен |
+| `OPENAI_API_KEY` | `.env` / env | OpenAI API key для анализа досок | опционален |
 | `CACHE_TTL_MS` | `miro-client.ts` | Время жизни кэша | 5 мин (300000 ms) |
 
 ## Расширение функционала

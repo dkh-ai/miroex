@@ -1,9 +1,10 @@
 import "dotenv/config";
-import { select, input } from "@inquirer/prompts";
+import { select, input, confirm } from "@inquirer/prompts";
 import { MiroClient } from "./miro-client.js";
 import { renderBoardToSvg } from "./svg-renderer.js";
 import { wrapHtml } from "./render.js";
 import { serializeBoard } from "./serializer.js";
+import { analyzeBoard, chatAboutBoard } from "./analyzer.js";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
@@ -50,6 +51,7 @@ async function selectAction(): Promise<string> {
       { name: "Render (HTML viewer)", value: "render-html" },
       { name: "Render (SVG only)", value: "render-svg" },
       { name: "Export (JSON + text)", value: "export" },
+      { name: "Analyze (LLM summary + insights + chat)", value: "analyze" },
       { name: "Board info", value: "info" },
     ],
   });
@@ -92,6 +94,29 @@ async function runAction(action: string, cache: BoardCache): Promise<void> {
       const textPath = join(outDir, "02-serialized.txt");
       writeFileSync(textPath, text);
       console.log(`Serialized: ${textPath} (${text.length.toLocaleString()} chars)`);
+      break;
+    }
+    case "analyze": {
+      const text = serializeBoard(cache);
+      const frames = cache.items.filter((i) => i.type === "frame");
+      const stats = { items: cache.items.length, connectors: cache.connectors.length, frames: frames.length };
+
+      const result = await analyzeBoard(text, boardName, safeId, stats);
+
+      console.log("\n" + result.analysis);
+      console.log("\n---\n");
+      console.log(result.insights);
+
+      const outDir = join("output", safeName);
+      mkdirSync(outDir, { recursive: true });
+      writeFileSync(join(outDir, "03-analysis.md"), result.analysis);
+      writeFileSync(join(outDir, "04-insights.md"), result.insights);
+      console.log(`\nSaved to ${outDir}/03-analysis.md and 04-insights.md`);
+
+      const startChat = await confirm({ message: "Start interactive chat about the board?" });
+      if (startChat) {
+        await chatAboutBoard(text, result.analysis, result.insights);
+      }
       break;
     }
     case "info": {
