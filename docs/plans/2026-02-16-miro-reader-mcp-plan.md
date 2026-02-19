@@ -10,7 +10,7 @@
 
 **Design doc:** `docs/plans/2026-02-16-miro-reader-mcp-design.md`
 
-**Project location:** `/Users/khrupov/projects/miroex`
+**Project location:** `./`
 
 ---
 
@@ -116,7 +116,7 @@ Commit: "Register all 6 MCP tools for board navigation"
 ### Task 6: Register MCP server in Claude Code
 
 1. Get Miro API token from https://miro.com/app/settings/user-profile/apps (scope: `boards:read`)
-2. Register: `claude mcp add miroex -e MIRO_API_TOKEN=<token> -- npx tsx /Users/khrupov/projects/miroex/src/index.ts`
+2. Register: `claude mcp add miroex -e MIRO_API_TOKEN=<token> -- npx tsx $(pwd)/src/index.ts`
 3. Verify: `claude mcp list` shows miroex as Connected
 4. Test with real board
 

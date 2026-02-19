@@ -17,7 +17,7 @@
 
 **Step 1: Install @inquirer/prompts**
 
-Run: `cd /Users/khrupov/projects/miroex && npm install @inquirer/prompts`
+Run: `cd . && npm install @inquirer/prompts`
 
 **Step 2: Add cli script to package.json**
 
@@ -28,7 +28,7 @@ In `package.json`, add to `"scripts"`:
 
 **Step 3: Verify install**
 
-Run: `cd /Users/khrupov/projects/miroex && npm ls @inquirer/prompts`
+Run: `cd . && npm ls @inquirer/prompts`
 Expected: `@inquirer/prompts@...` listed
 
 **Step 4: Commit**
@@ -61,7 +61,7 @@ Note: Uses existing `fetchAllPages()` with `MiroPaginatedResponse<MiroBoard>` â€
 
 **Step 2: Verify TypeScript compiles**
 
-Run: `cd /Users/khrupov/projects/miroex && npx tsc --noEmit`
+Run: `cd . && npx tsc --noEmit`
 Expected: No errors
 
 **Step 3: Commit**
@@ -91,7 +91,7 @@ export function wrapHtml(svgContent: string, boardName: string): string {
 
 **Step 2: Verify TypeScript compiles**
 
-Run: `cd /Users/khrupov/projects/miroex && npx tsc --noEmit`
+Run: `cd . && npx tsc --noEmit`
 Expected: No errors
 
 **Step 3: Commit**
@@ -269,7 +269,7 @@ main().catch((err) => {
 
 **Step 2: Verify TypeScript compiles**
 
-Run: `cd /Users/khrupov/projects/miroex && npx tsc --noEmit`
+Run: `cd . && npx tsc --noEmit`
 Expected: No errors
 
 **Step 3: Commit**
@@ -285,12 +285,12 @@ git commit -m "Add interactive CLI with board selection and actions"
 
 **Step 1: Run the CLI**
 
-Run: `cd /Users/khrupov/projects/miroex && npm run cli`
+Run: `cd . && npm run cli`
 Expected: Shows "MiroEx â€” Miro Board Tools", loads board list, allows selection
 
 **Step 2: Test with a known board ID**
 
-Run: `cd /Users/khrupov/projects/miroex && npm run cli -- <known_board_id>`
+Run: `cd . && npm run cli -- <known_board_id>`
 Expected: Skips board selection, goes straight to action menu
 
 **Step 3: Test each action**

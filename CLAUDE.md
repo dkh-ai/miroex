@@ -255,7 +255,7 @@ npm run cli    # Interactive CLI (board selection, render, export, info)
 ## Регистрация MCP
 
 ```bash
-claude mcp add miroex -e MIRO_API_TOKEN=<token> -- npx tsx /Users/khrupov/projects/miroex/src/index.ts
+claude mcp add miroex -e MIRO_API_TOKEN=<token> -- npx tsx $(pwd)/src/index.ts
 ```
 
 ## Известные ограничения

@@ -62,15 +62,15 @@ claude mcp list
 Now you can ask Claude about your Miro boards:
 
 ```
-Read miro board uXjVOpTa57Q and extract all decisions
+Read miro board <board_id> and extract all decisions
 ```
 
 ```
-Show the connection graph on board o9J_lE-o5AY
+Show the connection graph on board <board_id>
 ```
 
 ```
-Search board uXjVPbD1awU for everything related to "architecture"
+Search board <board_id> for everything related to "architecture"
 ```
 
 ### Interactive CLI
