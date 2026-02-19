@@ -2,10 +2,10 @@
 
 ## Высокий приоритет
 
-- [ ] **LLM-пайплайн в CLI** — полный цикл: fetch → export → анализ через Anthropic API → сохранение insights
-  - Добавить шаг `03-analysis.md` и `04-insights.md` в пайплайн экспорта
-  - Интеграция с `@anthropic-ai/sdk`
-  - Настраиваемые промпты для анализа
+- [x] **LLM-пайплайн в CLI** — ~~Anthropic API~~ реализовано через OpenAI (gpt-4o) в `src/analyzer.ts`
+  - `analyzeBoard()` — analysis + insights
+  - `chatAboutBoard()` — интерактивный чат с streaming
+  - Интегрировано в CLI (action "analyze") и export (опциональный LLM-анализ)
 
 - [ ] **Исправить isMain guard в render.ts** — текущая проверка через `import.meta.url.endsWith()` хрупкая
   - Рассмотреть `process.argv[1]` с `path.resolve()` или `fileURLToPath()`
