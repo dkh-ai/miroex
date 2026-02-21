@@ -17,3 +17,13 @@ board-*.svg
 
 # TypeScript
 *.tsbuildinfo
+
+# SIM (Self-Improving Machine) data
+.learnings/sessions/
+.learnings/metrics/
+
+# SIM (Self-Improving Machine) data
+.learnings/sessions/
+.learnings/metrics/
+.learnings/.session-start-commit
+.learnings/.session-start-time
